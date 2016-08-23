@@ -40,7 +40,17 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_add_white_24px" />
+    <com.bowyer.app.fabtoolbar.FabToolbar
+        android:id="@+id/agora_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:tb_color="@color/colorAccent"
+        app:tb_container_gravity="center"
+        app:tb_anim_duration="400"
+        app:tb_fab_type="normal">
 
+    </com.bowyer.app.fabtoolbar.FabToolbar>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/sort_fab"
         android:layout_width="wrap_content"

@@ -5,26 +5,10 @@
     android:layout_height="wrap_content"
     tools:context=".Agora_tab">
 
-
-    <!-- TODO: Update blank fragment layout -->
-    <ScrollView
-        android:id="@+id/tab_agora_scroll"
+    <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
-            android:id="@+id/tab_agora_linearlayout"
-            android:orientation="vertical"
-            android:layout_margin="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal|top">
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/progressBar"
-                android:layout_gravity="center" />
-        </LinearLayout>
-    </ScrollView>
-
+        android:layout_height="match_parent"
+        android:id="@+id/agora_list_view">
+    </ListView>
 
 </FrameLayout>

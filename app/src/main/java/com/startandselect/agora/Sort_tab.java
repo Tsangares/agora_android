@@ -1,5 +1,6 @@
 package com.startandselect.agora;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.net.Uri;
@@ -8,17 +9,21 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.BaseAdapter;
+import android.widget.GridLayout;
 import android.widget.Toast;
 
 import com.bowyer.app.fabtoolbar.FabToolbar;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -34,7 +39,6 @@ import java.net.URL;
  * create an instance of this fragment.
  */
 public class Sort_tab extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -43,8 +47,7 @@ public class Sort_tab extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private OnSortListener mListener;
-
+    private OnAccountListener account;
     public Sort_tab() {
         // Required empty public constructor
     }
@@ -81,53 +84,16 @@ public class Sort_tab extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View output = inflater.inflate(R.layout.fragment_sort_tab, container, false);
-        final FabToolbar sortToolbar = (FabToolbar) getActivity().findViewById(R.id.sort_toolbar);
-        final FloatingActionButton sortFab = (FloatingActionButton) getActivity().findViewById(R.id.sort_fab);
-        final SearchView searchBox = (SearchView)getActivity().findViewById(R.id.search_box);
+        final FabToolbar sortToolbar = (FabToolbar) output.findViewById(R.id.sort_toolbar);
+        final FloatingActionButton sortFab = (FloatingActionButton) output.findViewById(R.id.sort_fab);
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Service.INPUT_METHOD_SERVICE);
-        searchBox.setQueryHint("Search the mainframe");
-        searchBox.setIconifiedByDefault(false);
-        searchBox.setIconified(false);
-        sortToolbar.setFab(sortFab);
-
-        sortFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sortToolbar.expandFab();
-                searchBox.requestFocus();
-                imm.showSoftInput(searchBox, 0);
-
-            }
-        });
-        output.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(searchBox.getQuery().length() == 0){
-                    sortToolbar.slideInFab();
-                }
-                imm.hideSoftInputFromWindow(searchBox.getWindowToken(), 0);
-                return false;
-            }
-        });
-        getPopularTagData();
+        fetchPopularTagData();
         return output;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnSortListener) {
-            mListener = (OnSortListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnAgoraListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
     public void processPopularTagData(final String data){
         //Process the data from the server.
@@ -141,7 +107,16 @@ public class Sort_tab extends Fragment {
                         try {
                             JSONArray arr = new JSONArray(data);
                             for(int i = 0; i < arr.length(); ++i){
-                                thisContainer.addView(new TagButton(getContext(), arr.getJSONObject(i)));
+                                QuestionCard tag = new QuestionCard(getContext(), null);
+                                final String tagText = arr.getJSONObject(i).getString("tag");
+                                tag.QuestionTitle.setText(tagText);
+                                tag.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        ((OnAgoraListener) getContext()).setFilterTags(tagText);
+                                    }
+                                });
+                                thisContainer.addView(tag);
                             }
                         }catch(Exception e){
                             throw new RuntimeException(e.toString());
@@ -156,7 +131,7 @@ public class Sort_tab extends Fragment {
             throw new RuntimeException(e.toString());
         }
     }
-    public void getPopularTagData(){
+    public void fetchPopularTagData(){
         //Get the data from the server.
         AsyncTask<Void, Void, Void> net = new AsyncTask<Void, Void, Void>() {
             @Override
@@ -164,13 +139,13 @@ public class Sort_tab extends Fragment {
                 try{
                     if(Looper.myLooper() == null)Looper.prepare();
                     Toast.makeText(getContext(), "Asking Server", Toast.LENGTH_SHORT).show();
-                    URL url = new URL("http://startandselect.com/scripts/GetPopularTags.php");
+                    URL url = new URL("https://startandselect.com/scripts/GetPopularTags.php");
                     HttpURLConnection connect = (HttpURLConnection)url.openConnection();
                     connect.setRequestMethod("POST");
 
                     /*//post attributes
-                    ContentValues parameters = new ContentValues();
-                    parameters.put("value", "test");
+                    RestParam parameters = new RestParam();
+                    parameters.add("value", "test");
 
                     OutputStream os = connect.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
@@ -191,18 +166,5 @@ public class Sort_tab extends Fragment {
             }
         };
         net.execute();
-    }
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnSortListener {
-        // TODO: Update argument type and name
     }
 }

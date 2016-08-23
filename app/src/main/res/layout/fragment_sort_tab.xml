@@ -12,7 +12,8 @@
             android:id="@+id/tab_sort_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:numColumns="2">
 
             <TextView
                 android:textSize="24dp"

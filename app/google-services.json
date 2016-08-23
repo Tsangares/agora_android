@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "199653209003",
+    "project_id": "agora-4e68d"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199653209003:android:2f23cb8f9a930979",
+        "android_client_info": {
+          "package_name": "com.startandselect.agora"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "199653209003-hehpqlkjjkgi6gl717i692bjier8jbht.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.startandselect.agora",
+            "certificate_hash": "FC2521C20812037D63FF09DD0C81469306A7AC8B"
+          }
+        },
+        {
+          "client_id": "199653209003-2rt13r68rj3a0m5e9hsfrardn5dos8bk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5ZQpTBEtkrhUPKNoDfbt5Eim1C6MEsFg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

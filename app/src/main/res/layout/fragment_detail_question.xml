@@ -1,0 +1,50 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Detail_Question">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/blank_question"
+                    android:textSize="@dimen/h3"
+                    android:paddingLeft="@dimen/padding_minor"
+                    android:paddingRight="@dimen/padding_minor"
+                    android:paddingTop="@dimen/padding_extra"
+                    android:paddingBottom="@dimen/padding_extra"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/detail_question_title"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignBottom="@id/detail_question_title"
+                    android:text="username"
+                    android:id="@+id/detail_question_creator"
+                    android:layout_margin="@dimen/padding_minor"/>
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/detail_question_list">
+
+        </ListView>
+    </LinearLayout>
+
+
+</FrameLayout>

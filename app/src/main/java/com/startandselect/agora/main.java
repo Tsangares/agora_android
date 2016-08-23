@@ -1,5 +1,8 @@
 package com.startandselect.agora;
 
+import android.accounts.Account;
+import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.util.SortedList;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +23,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bowyer.app.fabtoolbar.FabToolbar;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+
+import org.json.JSONObject;
 
 public class main extends AppCompatActivity
-        implements Agora_tab.OnAgoraListener,
-                    Sort_tab.OnSortListener{
+        implements  OnAccountListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -31,7 +41,12 @@ public class main extends AppCompatActivity
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    public static boolean anonymous = true;
+    public static boolean loggedin = false;
 
+    public Account_tab  account_tab = null;
+    public Agora_tab    agora_tab   = null;
+    public Sort_tab     sort_tab    = null;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -41,19 +56,16 @@ public class main extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabmain);
-
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+        
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-
+        sort_tab = Sort_tab.newInstance("null", "null");
+        account_tab = Account_tab.newInstance("null", "null");
+        agora_tab = Agora_tab.newInstance(null);
 
 
         TabLayout tabLayout = (TabLayout)findViewById(R.id.toolbar);
@@ -67,21 +79,20 @@ public class main extends AppCompatActivity
         for(int i = 0; i < ICONS.length; ++i){
             tabLayout.getTabAt(i).setIcon(ICONS[i]);
         }
-
         //FAB
         final FloatingActionButton agoraFab = (FloatingActionButton) findViewById(R.id.agora_fab);
         final FabToolbar sortToolbar = (FabToolbar) findViewById(R.id.sort_toolbar);
         final FloatingActionButton sortFab = (FloatingActionButton) findViewById(R.id.sort_fab);
-
+        if(!anonymous || !loggedin){
+            agoraFab.setVisibility(View.GONE);
+        }
+        final Activity activity = this;
         agoraFab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Don't press that button again...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                startActivityForResult(new Intent(activity, NewQuestion.class), Login.RC_QUESTION);
             }
         });
-
-
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -116,6 +127,35 @@ public class main extends AppCompatActivity
         });
         sortFab.hide();
         sortToolbar.hide();
+        agoraFab.show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        switch(requestCode){
+            case(Account_tab.RC_GOOG):
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                handleSignInResult(result);
+                if(resultCode == RESULT_OK){
+                    //Good
+                }
+                break;
+            case(Account_tab.RC_AGORA):
+                if(resultCode == RESULT_OK) {
+                    account_tab.agoraSignin(data.getStringExtra("account"));
+                }
+                break;
+            case(Login.RC_QUESTION):{
+                if(resultCode == RESULT_OK){
+                    //agora_tab.addQuestion(data.getStringExtra("question"));
+                    account_tab.addMyQuestions(1);
+                }
+            }
+
+        }
+    }
+    public void handleSignInResult(GoogleSignInResult result){
+        account_tab.handleSignInResult(result);
     }
     public void onFragmentInteraction(Uri uri){
         return;
@@ -152,12 +192,64 @@ public class main extends AppCompatActivity
             View rootView = inflater.inflate(R.layout.fragment_tabmain, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-
-
             return rootView;
         }
 
     }
+    public void     setMyQuestions(String input){
+        account_tab.setMyQuestions(input);
+    }
+    public void     addMyQuestions(Integer input){
+        account_tab.addMyQuestions(input);
+    }
+    public Integer  getMyQuestions(){
+        return account_tab.getMyQuestions();
+    }
+    public void     setMyResponses(String input){
+        account_tab.setMyResponses(input);
+    }
+    public void     addMyResponses(Integer input){
+        account_tab.addMyResponses(input);
+    }
+    public Integer  getMyResponses(){ return account_tab.getMyResponses(); }
+    public void     setMyVotes(String input){ account_tab.setMyVotes(input); }
+    public void     addMyVotes(Integer input){
+        account_tab.addMyVotes(input);
+    }
+    public Integer  getMyVotes(){
+        return account_tab.getMyVotes();
+    }
+    public void     setQuestionVotes(String input){
+        account_tab.setQuestionVotes(input);
+    }
+    public void     addQuestionVotes(Integer input){
+        account_tab.addQuestionVotes(input);
+    }
+    public Integer  getQuestionVotes(){
+        return account_tab.getQuestionVotes();
+    }
+    public void     setResponseVotes(String input){
+        account_tab.setResponseVotes(input);
+    }
+    public void     addResponseVotes(Integer input){
+        account_tab.addResponseVotes(input);
+    }
+    public Integer  getResponseVotes(){
+        return account_tab.getResponseVotes();
+    }
+    public void     setTotalResponses(String input){
+        account_tab.setTotalResponses(input);
+    }
+    public void     addTotalResponses(Integer input){
+        account_tab.addTotalResponses(input);
+    }
+    public Integer  getTotalResponses(){
+        return account_tab.getTotalResponses();
+    }
+    public void     setProfileName(String newName){
+        account_tab.setProfileName(newName);
+    }
+    public Integer  getUser_id(){return account_tab.getUser_id();}
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -173,10 +265,13 @@ public class main extends AppCompatActivity
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position == 0){
-                return Agora_tab.newInstance("null", "null");
+                return agora_tab;
             }
             if(position == 1){
-                return Sort_tab.newInstance("null", "null");
+                return sort_tab;
+            }
+            if(position == 2){
+                return account_tab;
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
