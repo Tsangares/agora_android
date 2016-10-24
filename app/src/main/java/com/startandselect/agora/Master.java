@@ -1,5 +1,7 @@
 package com.startandselect.agora;
 
+import android.accounts.Account;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -12,6 +14,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 
 public class Master extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -85,7 +90,33 @@ public class Master extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (resultCode == RESULT_OK) {
+            if (requestCode == Account_tab.RC_AGORA) {
+                String account_data = data.getStringExtra("account");
+                FragmentManager fg = getSupportFragmentManager();
+                Fragment current = fg.findFragmentById(R.id.main_content);
+                Account_tab account_tab = null;
+                if(current instanceof Account_tab) {
+                    account_tab = (Account_tab) current;
+                    account_tab.setAccount(new DataUser(account_data));
+                }else{
+                    account_tab = Account_tab.newInstance(account_data);
+                    FragmentTransaction transaction = fg.beginTransaction();
+                    transaction.replace(R.id.main_content, account_tab);
+                    transaction.addToBackStack(Master.FRAG_AGORA);
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.commit();
+                }
+            }else if(requestCode == Account_tab.RC_GOOG){
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                //Switch to account_tab fragment and put result in the bundle
 
+            }
+        }
+    }
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -101,7 +132,7 @@ public class Master extends AppCompatActivity
             frag = Sort_tab.newInstance("","");
             transaction.replace(R.id.main_content, frag, FRAG_TAGS);
         } else if (id == R.id.nav_account) {
-            frag = Account_tab.newInstance("","");
+            frag = Account_tab.newInstance(null);
             transaction.replace(R.id.main_content, frag, FRAG_ACCT);
         } else if (id == R.id.nav_add) {
             frag = NewQuestion.newInstance();

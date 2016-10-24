@@ -40,8 +40,6 @@ public class QuestionAdapter extends ArrayAdapter<DataQuestion> {
                 if(title != null){
                     title.setText(text);
                 }
-
-
             }catch(Exception e){
                 throw new RuntimeException(e.toString());
             }

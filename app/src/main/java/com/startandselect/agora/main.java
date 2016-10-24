@@ -29,8 +29,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 
 import org.json.JSONObject;
 
-public class main extends AppCompatActivity
-        implements  OnAccountListener{
+public class main extends AppCompatActivity{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -64,7 +63,7 @@ public class main extends AppCompatActivity
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         sort_tab = Sort_tab.newInstance("null", "null");
-        account_tab = Account_tab.newInstance("null", "null");
+        account_tab = Account_tab.newInstance(null);
         agora_tab = Agora_tab.newInstance(null);
 
 
@@ -132,15 +131,15 @@ public class main extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        switch(requestCode){
-            case(Account_tab.RC_GOOG):
+        /*switch(requestCode){
+            case( Account_tab.RC_GOOG ):
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 handleSignInResult(result);
-                if(resultCode == RESULT_OK){
+                if( resultCode == RESULT_OK ){
                     //Good
                 }
                 break;
-            case(Account_tab.RC_AGORA):
+            case( Account_tab.RC_AGORA ):
                 if(resultCode == RESULT_OK) {
                     account_tab.agoraSignin(data.getStringExtra("account"));
                 }
@@ -152,7 +151,7 @@ public class main extends AppCompatActivity
                 }
             }
 
-        }
+        }*/
     }
     public void handleSignInResult(GoogleSignInResult result){
         account_tab.handleSignInResult(result);
@@ -249,7 +248,6 @@ public class main extends AppCompatActivity
     public void     setProfileName(String newName){
         account_tab.setProfileName(newName);
     }
-    public Integer  getUser_id(){return account_tab.getUser_id();}
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

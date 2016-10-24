@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Detail_Question">
+    tools:context=".Detail_Response">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,21 +17,21 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/blank_question"
+                    android:text="@string/blank_response"
                     android:textSize="@dimen/h3"
                     android:paddingLeft="@dimen/padding_minor"
                     android:paddingRight="@dimen/padding_minor"
                     android:paddingTop="@dimen/padding_extra"
                     android:paddingBottom="27dp"
                     android:gravity="center_horizontal"
-                    android:id="@+id/detail_question_title"/>
+                    android:id="@+id/detail_response_title"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_alignBottom="@id/detail_question_title"
+                    android:layout_alignBottom="@id/detail_response_title"
                     android:text="username"
-                    android:id="@+id/detail_question_creator"
+                    android:id="@+id/detail_response_creator"
                     android:layout_margin="@dimen/padding_minor"/>
             </RelativeLayout>
 
@@ -42,15 +42,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/modules_none"
-            android:text="@string/no_responses"
-            android:textSize="@dimen/h4"/>
+            android:textSize="@dimen/h4"
+            android:text="@string/no_modules"/>
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/detail_question_list">
+            android:id="@+id/detail_response_list">
 
         </ListView>
     </LinearLayout>
-
 
 </FrameLayout>

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,7 +31,7 @@ public class NewQuestion extends Fragment {
     public static final String data_name = "question";
     EditText    inputQuestion   = null;
     EditText    inputTags       = null;
-    Button      submit          = null;
+    FloatingActionButton submit = null;
     TextView    prompt          = null;
 
     public NewQuestion(){
@@ -54,7 +55,7 @@ public class NewQuestion extends Fragment {
         final View output = inflater.inflate(R.layout.activity_new_question, container, false);
         inputQuestion  = (EditText) output.findViewById(R.id.newquestion_questioninput);
         inputTags      = (EditText) output.findViewById(R.id.newquestion_taginput);
-        submit         = (Button)   output.findViewById(R.id.newquestion_submit);
+        submit         = (FloatingActionButton)   output.findViewById(R.id.newquestion_submit);
         prompt         = (TextView) output.findViewById(R.id.newquestion_prompt);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +65,7 @@ public class NewQuestion extends Fragment {
                     prompt.setText(R.string.newquestion_error_noquestion);
                 }else if(inputTags.getText().toString().equals("")){
                     prompt.setText(R.string.newquestion_error_notags);
-                }else{
+                }else {
                     prompt.setText(R.string.newquestion_success);
                     sendNewQuestionData();
                 }
@@ -90,10 +91,9 @@ public class NewQuestion extends Fragment {
                 try{
                     if(Looper.myLooper() == null)Looper.prepare();
                     Toast.makeText(activity, "Asking Server", Toast.LENGTH_SHORT).show();
-                    URL url = new URL("https://startandselect.com/scripts/UploadQuestion.php");
+                    URL url = new URL("http://api.iex.ist/full/question");
                     HttpURLConnection connect = (HttpURLConnection)url.openConnection();
                     connect.setRequestMethod("POST");
-
                     //post attributes
                     RestParam parameters = new RestParam();
                     parameters.add("question", questionText);

@@ -4,38 +4,46 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:id="@+id/response_view">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/response_title"
-            android:padding="@dimen/padding_default"
-            android:textSize="@dimen/h3"
-            android:text="Response Text"/>
-        <RelativeLayout
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/response_details"
-            android:layout_margin="@dimen/padding_default"
-            android:layout_marginTop="0dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Votes: 0"
-                    android:textSize="@dimen/h4"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Other: 0"
-                    android:layout_alignParentRight="true"
-                    android:textSize="@dimen/h4"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/response_title"
+                android:padding="20dp"
+                android:layout_marginRight="@dimen/padding_default"
+                android:textSize="@dimen/h3"
+                android:text="Response Text"/>
+            <LinearLayout
+                android:alpha="0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/response_title"
+                android:layout_centerHorizontal="false"
+                android:layout_marginLeft="20dp"
+                android:id="@+id/response_details"
+                android:layout_marginTop="3dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Votes: \t0"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="\t5%"/>
+            </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_chevron_right_black_24px"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="@dimen/padding_default"
+                android:alpha=".6"
+                android:id="@+id/response_modules_button"
+                />
+
         </RelativeLayout>
-
-
-        </LinearLayout>
 </LinearLayout>

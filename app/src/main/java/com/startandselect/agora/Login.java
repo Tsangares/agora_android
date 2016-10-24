@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -30,6 +31,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -76,7 +79,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
         // Set up the login form.
-        mUserView = (AutoCompleteTextView) findViewById(R.id.email);
+        mUserView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -91,8 +94,8 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        FloatingActionButton mSignInButton = (FloatingActionButton) findViewById(R.id.email_sign_in_button);
+        mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -194,8 +197,9 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(username, password);
-            mAuthTask.execute((Void) null);
+            ApiRequest request = new ApiRequest("login/", ApiRequest.FULL);
+            request.setMethod(ApiRequest.GET);
+            new UserLoginTask(username, password).execute();
         }
     }
     private boolean isUservalid(String username) {
@@ -298,11 +302,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mUserView.setAdapter(adapter);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<ApiRequest, Void, String> {
 
         private final String mUsername;
         private final String mPassword;
@@ -313,21 +313,19 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(ApiRequest... requests) {
             if(Looper.myLooper() == null)Looper.prepare();
             try {
-                URL url = new URL("https://startandselect.com/scripts/Login.php");
-                HttpURLConnection connect = (HttpURLConnection) url.openConnection();
-                connect.setRequestMethod("POST");
+                ApiRequest request = requests[0];
+                HttpURLConnection connect = (HttpURLConnection) (new URL(request.URL)).openConnection();
+                connect.setRequestMethod(request.getMethod());
 
-                //post attributes
-                RestParam parameters = new RestParam();
-                parameters.add("username", mUsername);
-                parameters.add("password", mPassword);
+                request.add("username", mUsername);
+                request.add("password", mPassword);
 
                 OutputStream os = connect.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                writer.write(parameters.toString());
+                writer.write(request.params.toString());
                 writer.flush();
                 writer.close();
                 os.close();
@@ -336,34 +334,42 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
                 final InputStream is = new BufferedInputStream(connect.getInputStream());
                 final String data = Common.convertinputStreamToString(is);
-                if(data.equals("invalid")){
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mPasswordView.setError(getString(R.string.error_wrong_password));
-                        }
-                    });
-                    return false;
+                try{
+                    JSONObject obj = new JSONObject(data);
+                    if(obj.getBoolean("success")){
+                        //success
+                        return data;
+                    }else{
+                        String reason = obj.getString("reason");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPasswordView.setError(getString(R.string.error_wrong_password));
+                            }
+                        });
+                        return null;
+                    }
+                }catch (Exception e){
+
                 }
-                Intent output = new Intent();
-                output.putExtra("account", data);
-                setResult(RESULT_OK, output);
-                finish();
             }catch(Exception e){
                 e.toString();
                 Intent output = new Intent();
                 setResult(RESULT_CANCELED, output);
                 finish();
-                return false;
+                return null;
             }
-            return true;
+            return null;
         }
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String data) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            if (data != null) {
+                Intent output = new Intent();
+                output.putExtra("account", data);
+                setResult(RESULT_OK, output);
                 finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

@@ -1,11 +1,7 @@
 package com.startandselect.agora;
 
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
-import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -35,26 +31,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class Account_tab extends Fragment
-        implements  GoogleApiClient.OnConnectionFailedListener,
-                    View.OnClickListener,
-                    GoogleSignInApi,
-                    OnAccountListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    public final static int RC_GOOG = 6969;
-    public final static int RC_AGORA = 666;
-    private String mParam1;
-    private String mParam2;
+        implements  GoogleSignInApi{
+    public static int RC_AGORA = 6116;
+    public static int RC_GOOG = 1661;
+
+    private static final String ARG_UESR_DATA = "user_data";
 
     public GoogleSignInOptions gso;
     public GoogleApiClient mGoogleApiClient;
+
+    public DataUser user = null;
+
     public String name = "Doe";
     public Integer user_id = null;
+    public String key = "";
 
-
-    public Integer[] recentQuestions = {};
     private Integer myQuestions = 0;
     private Integer myResponses = 0;
     private Integer myVotes = 0;
@@ -63,14 +54,14 @@ public class Account_tab extends Fragment
     private Integer TotalResponses = 0;
 
     public Account_tab() {
-        // Required empty public constructor
     }
 
-    public static Account_tab newInstance(String param1, String param2) {
+    public static Account_tab newInstance(String user_data) {
         Account_tab fragment = new Account_tab();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        if(user_data == null){
+            args.putString(ARG_UESR_DATA, user_data);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,8 +70,7 @@ public class Account_tab extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            setAccount(new DataUser(getArguments().getString(ARG_UESR_DATA)));
         }
     }
 
@@ -89,9 +79,10 @@ public class Account_tab extends Fragment
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         ViewGroup output = (ViewGroup)inflater.inflate(R.layout.fragment_account_tab, container, false);
-        View accountCard = (View)output.findViewById(R.id.account_profile_card);
-        View loginButton = (View)output.findViewById(R.id.account_sign_in_agora);
-        //ViewGroup linearContainer = (ViewGroup)output.findViewById(R.user_id.account_container);
+        View accountCard = output.findViewById(R.id.account_profile_card);
+        View loginButton = output.findViewById(R.id.account_sign_in_agora);
+
+        //Google Api
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail().requestProfile().requestId()
                 .build();
@@ -100,15 +91,27 @@ public class Account_tab extends Fragment
             mGoogleApiClient.disconnect();
         }
         mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .enableAutoManage(getActivity(), this)
+                .enableAutoManage(getActivity(), new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        //hmm
+                    }
+                })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        output.findViewById(R.id.account_sign_in_google).setOnClickListener(this);
+        output.findViewById(R.id.account_sign_in_google).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                getActivity().startActivityForResult(signInIntent, RC_GOOG);
+                removeSignin();
+            }
+        });
+
+        //Agora Login Button
         View.OnClickListener openLogin = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);*/
                 removeSignin();
                 getActivity().startActivityForResult(new Intent(getActivity(), Login.class), RC_AGORA);
             }
@@ -121,49 +124,50 @@ public class Account_tab extends Fragment
         });
         accountCard.setOnClickListener(openLogin);
         loginButton.setOnClickListener(openLogin);
-        refreshAccount(output);
-        updateAccount(output);
-        if(user_id != null){
+        return output;
+    }
+    @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        //This is shit:
+        refreshAccount(); //Initializes all of the fields?
+        if(user != null){
+            //Sign in user from the data.
+            setAccount(user);
             removeSignin();
             displaySignout();
         }
-        return output;
     }
 
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-    //Google api
-    public void onClick(View v){
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        getActivity().startActivityForResult(signInIntent, RC_GOOG);
-        removeSignin();
+    public void setAccount(DataUser data){
+        user = data;
+        setProfileName(data.username);
+        setMyQuestions(data.total_questions);
+        setMyResponses(data.total_responses);
+        setMyVotes(data.total_votes);
+        setQuestionVotes(-1);
+        setResponseVotes(-1);
+        setTotalResponses(-1);
+        refreshAccount();
     }
 
     public void agoraSignin(String data){
         displaySignout();
         try{
-            JSONObject acct = new JSONObject(data);
-            updateAccount(acct, (ViewGroup) getView());
+            setAccount(new DataUser(data));
         }catch(Exception e){
             throw new RuntimeException(e.toString());
         }
     }
+
     public void agoraSignOut(){
         name = "Doe";
         setEmpty();
         removeSignout();
     }
 
+    //Google api
     public void handleSignInResult(GoogleSignInResult result){
-
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -218,22 +222,18 @@ public class Account_tab extends Fragment
     public PendingResult<Status> signOut(GoogleApiClient out){
         out.disconnect();
         return null;
-    }
+}
     public PendingResult<Status> revokeAccess (GoogleApiClient client){
         return null;
     }
     public OptionalPendingResult<GoogleSignInResult> silentSignIn (GoogleApiClient client){
         return null;
     }
+
     public Intent getSignInIntent (GoogleApiClient client){
         return null;
     }
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        //Fucked
-    }
-    public void updateAccountFromid(int input){
 
-    }
     public void displaySignin(){
         View button1 = getActivity().findViewById(R.id.account_sign_in_agora);
         View button2 = getActivity().findViewById(R.id.account_sign_in_google);
@@ -276,7 +276,6 @@ public class Account_tab extends Fragment
             }
         }).start();
     }
-
     public void setMyQuestions(String input){
         setMyQuestions(Integer.parseInt(input));
     }
@@ -361,6 +360,8 @@ public class Account_tab extends Fragment
         setResponseVotes(0);
         setTotalResponses(0);
         user_id = null;
+        user = null;
+        key = null;
     }
 
     public void refreshMyQuestions(ViewGroup container){
@@ -422,6 +423,9 @@ public class Account_tab extends Fragment
             e.toString();
         }
     }
+    public void refreshAccount(){
+        refreshAccount((ViewGroup)getView());
+    }
     public void refreshAccount(ViewGroup container){
         refreshProfileName(container);
         refreshMyQuestions(container);
@@ -430,58 +434,5 @@ public class Account_tab extends Fragment
         refreshResponseVotes(container);
         refreshQuestionVotes(container);
         refreshTotalResponses(container);
-    }
-    public void updateAccount(final ViewGroup container){
-        AsyncTask<Void, Void, Void> net = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try{
-                    if(Looper.myLooper() == null)Looper.prepare();
-                    URL url = new URL("https://startandselect.com/scripts/CheckUser.php");
-                    HttpURLConnection connect = (HttpURLConnection)url.openConnection();
-                    connect.setRequestMethod("POST");
-
-                    //post attributes
-                    RestParam parameters = new RestParam();
-                    if(user_id != null) {
-                        parameters.add("user_id", user_id.toString());
-                    }
-
-                    OutputStream os = connect.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(parameters.toString());
-                    writer.flush();
-                    writer.close();
-                    os.close();
-
-                    connect.connect();
-
-                    InputStream is = new BufferedInputStream(connect.getInputStream());
-                    String data = Common.convertinputStreamToString(is);
-                    updateAccount(new JSONObject(data), container);
-                }catch (Exception e){
-                    e.toString();
-                }
-                return null;
-            }
-        };
-    }
-    public void updateAccount(JSONObject data, ViewGroup container){
-        try {
-            setProfileName(data.getString("username"));
-            setMyQuestions(data.getString("MyQuestions"));
-            setMyResponses(data.getString("MyResponses"));
-            setMyVotes(data.getString("MyVotes"));
-            setQuestionVotes(data.getString("QuestionVotes"));
-            setResponseVotes(data.getString("ResponseVotes"));
-            setTotalResponses(data.getString("TotalResponses"));
-            user_id = data.getInt("id");
-            if(container != null)refreshAccount(container);
-        }catch (Exception e){
-            throw new RuntimeException(e.toString());
-        }
-    }
-    public Integer getUser_id() {
-        return user_id;
     }
 }
