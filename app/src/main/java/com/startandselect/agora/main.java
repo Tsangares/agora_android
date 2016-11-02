@@ -139,7 +139,7 @@ public class main extends AppCompatActivity{
                     //Good
                 }
                 break;
-            case( Account_tab.RC_AGORA ):
+            case( Account_tab.RC_LOGIN_AGORA ):
                 if(resultCode == RESULT_OK) {
                     account_tab.agoraSignin(data.getStringExtra("account"));
                 }
@@ -153,13 +153,6 @@ public class main extends AppCompatActivity{
 
         }*/
     }
-    public void handleSignInResult(GoogleSignInResult result){
-        account_tab.handleSignInResult(result);
-    }
-    public void onFragmentInteraction(Uri uri){
-        return;
-    }
-
     /**
      * A placeholder fragment containing a simple view.
      */

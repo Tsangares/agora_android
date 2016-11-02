@@ -138,6 +138,9 @@ class ApiRequest{
         }
         return URL;
     }
+    public String getUrlGET(){
+        return URL + "?" + params.toString();
+    }
     public void setHandle(int _handle){
         handle = _handle;
     }
@@ -151,13 +154,19 @@ class ApiRequest{
         params.add(key,value);
         return params;
     }
+    public String toJSON(){
+        return params.toJSON();
+    }
+    public String toString(){return params.toString();}
 }
 class RestParam{
     public String output = "";
+    public String json = "{ ";
     public int count = 0;
     public void add(String key, String value){
         if(count++ != 0)output += "&";
         output += key + "=" + value;
+        json += "\"" + key+"\"" +": "+"\""+value+"\"" + ",";
     }
     public void put(String key, String value){
         add(key, value);
@@ -168,6 +177,10 @@ class RestParam{
     }
     public final String get(){
         return output;
+    }
+    public final String toJSON(){
+
+        return json.substring(0,json.length()-1)+" }";
     }
 }
 interface OnAccountListener{

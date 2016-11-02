@@ -1,6 +1,5 @@
 package com.startandselect.agora;
 
-import android.accounts.Account;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -14,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -52,13 +52,6 @@ public class Master extends AppCompatActivity
         transaction.add(R.id.main_content, frag, FRAG_AGORA);
         transaction.commit();
     }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        getSupportFragmentManager().putFragment(outState, FRAG_AGORA, getSupportFragmentManager().findFragmentByTag(FRAG_AGORA));
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -93,28 +86,33 @@ public class Master extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
-        if (resultCode == RESULT_OK) {
-            if (requestCode == Account_tab.RC_AGORA) {
-                String account_data = data.getStringExtra("account");
-                FragmentManager fg = getSupportFragmentManager();
-                Fragment current = fg.findFragmentById(R.id.main_content);
-                Account_tab account_tab = null;
-                if(current instanceof Account_tab) {
-                    account_tab = (Account_tab) current;
-                    account_tab.setAccount(new DataUser(account_data));
-                }else{
-                    account_tab = Account_tab.newInstance(account_data);
-                    FragmentTransaction transaction = fg.beginTransaction();
-                    transaction.replace(R.id.main_content, account_tab);
-                    transaction.addToBackStack(Master.FRAG_AGORA);
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.commit();
-                }
-            }else if(requestCode == Account_tab.RC_GOOG){
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-                //Switch to account_tab fragment and put result in the bundle
-
+        if (requestCode == Account_tab.RC_LOGIN_AGORA) {
+            if(resultCode != RESULT_OK){
+                Toast.makeText(this, "Failed to Login.", Toast.LENGTH_SHORT).show();
+                return;
             }
+            String account_data = data.getStringExtra("account");
+            FragmentManager fg = getSupportFragmentManager();
+            Fragment current = fg.findFragmentById(R.id.main_content);
+            Account_tab account_tab = null;
+            if(current instanceof Account_tab) {
+                account_tab = (Account_tab) current;
+                account_tab.setAccount(new DataUser(account_data));
+            }else{
+                account_tab = Account_tab.newInstance(account_data);
+                FragmentTransaction transaction = fg.beginTransaction();
+                transaction.replace(R.id.main_content, account_tab);
+                transaction.addToBackStack(Master.FRAG_AGORA);
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.commit();
+            }
+        }else if(requestCode == Account_tab.RC_GOOG){
+            if (resultCode != RESULT_OK) {
+                return;
+            }
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            //Switch to account_tab fragment and put result in the bundle
+
         }
     }
     @SuppressWarnings("StatementWithEmptyBody")

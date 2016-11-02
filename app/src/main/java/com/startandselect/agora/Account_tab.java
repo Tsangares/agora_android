@@ -2,43 +2,21 @@ package com.startandselect.agora;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
 
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-public class Account_tab extends Fragment
-        implements  GoogleSignInApi{
-    public static int RC_AGORA = 6116;
+public class Account_tab extends Fragment{
+    public static int RC_LOGIN_AGORA = 6116;
+    public static int RC_REGISTER_AGORA = 6226;
     public static int RC_GOOG = 1661;
 
     private static final String ARG_UESR_DATA = "user_data";
-
-    public GoogleSignInOptions gso;
-    public GoogleApiClient mGoogleApiClient;
 
     public DataUser user = null;
 
@@ -70,76 +48,56 @@ public class Account_tab extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            setAccount(new DataUser(getArguments().getString(ARG_UESR_DATA)));
+            if(getArguments().getString(ARG_UESR_DATA) != null) {
+                setAccount(new DataUser(getArguments().getString(ARG_UESR_DATA)));
+            }
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        ViewGroup output = (ViewGroup)inflater.inflate(R.layout.fragment_account_tab, container, false);
-        View accountCard = output.findViewById(R.id.account_profile_card);
-        View loginButton = output.findViewById(R.id.account_sign_in_agora);
-
-        //Google Api
-        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail().requestProfile().requestId()
-                .build();
-        if(mGoogleApiClient != null){
-            mGoogleApiClient.stopAutoManage(getActivity());
-            mGoogleApiClient.disconnect();
-        }
-        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .enableAutoManage(getActivity(), new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        //hmm
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        output.findViewById(R.id.account_sign_in_google).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                getActivity().startActivityForResult(signInIntent, RC_GOOG);
-                removeSignin();
-            }
-        });
-
-        //Agora Login Button
-        View.OnClickListener openLogin = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                removeSignin();
-                getActivity().startActivityForResult(new Intent(getActivity(), Login.class), RC_AGORA);
-            }
-        };
-        output.findViewById(R.id.account_sign_out_button).setOnClickListener(new View.OnClickListener() {
+        return inflater.inflate(R.layout.fragment_account_tab, container, false);
+    }
+    @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getView().findViewById(R.id.account_sign_out_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 agoraSignOut();
             }
         });
-        accountCard.setOnClickListener(openLogin);
-        loginButton.setOnClickListener(openLogin);
-        return output;
-    }
-    @Override
-    public void onActivityCreated (Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        //This is shit:
+        getView().findViewById(R.id.account_register).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().startActivityForResult(new Intent(getActivity(), Register.class), RC_REGISTER_AGORA);
+            }
+        });
+        //Agora Login Button
+        View.OnClickListener openLogin = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().startActivityForResult(new Intent(getActivity(), Login.class), RC_LOGIN_AGORA);
+            }
+        };
+        getView().findViewById(R.id.account_profile_card).setOnClickListener(openLogin);
+        getView().findViewById(R.id.account_sign_in_agora).setOnClickListener(openLogin);
+
+        //Data setup
         refreshAccount(); //Initializes all of the fields?
         if(user != null){
             //Sign in user from the data.
             setAccount(user);
-            removeSignin();
-            displaySignout();
         }
     }
+    public void saveAccount(){
 
+    }
     public void setAccount(DataUser data){
+        removeSignin();
+        displaySignout();
+        saveAccount();
         user = data;
         setProfileName(data.username);
         setMyQuestions(data.total_questions);
@@ -149,8 +107,21 @@ public class Account_tab extends Fragment
         setResponseVotes(-1);
         setTotalResponses(-1);
         refreshAccount();
+        displaySignout();
     }
-
+    public void setEmpty(){
+        setProfileName("Doe");
+        setMyQuestions(0);
+        setMyResponses(0);
+        setMyVotes(0);
+        setQuestionVotes(0);
+        setResponseVotes(0);
+        setTotalResponses(0);
+        user_id = null;
+        user = null;
+        key = null;
+        refreshAccount();
+    }
     public void agoraSignin(String data){
         displaySignout();
         try{
@@ -165,104 +136,35 @@ public class Account_tab extends Fragment
         setEmpty();
         removeSignout();
     }
-
-    //Google api
-    public void handleSignInResult(GoogleSignInResult result){
-        if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            name = "Jane";
-
-            try {
-                String temp = acct.getEmail();
-                if(temp != null)name = temp;
-            }catch (Exception e){
-                //Get something else
-                e.toString();
-            }
-            try {
-                String temp = acct.getDisplayName();
-                if(temp != null)name = temp;
-            }catch (Exception e){
-                //get another
-                e.toString();
-            }
-            try{
-                String temp = acct.getGivenName();
-                if(temp != null)name = temp;
-            }catch (Exception e){
-                //get another
-                e.toString();
-            }
-            try{
-                user_id = Integer.parseInt(acct.getId());
-            }catch(Exception e){
-                //no user_id!?
-                e.toString();
-            }
-            TextView handcock = (TextView)getActivity().findViewById(R.id.account_profile_name);
-            handcock.setText(name);
-
-            updateUI(true);
-        } else {
-            updateUI(false);
-        }
-
-    }
-    public void updateUI(boolean signInSuccess){
-        if(signInSuccess){
+    public void updateUI(boolean signInSuccess) {
+        if (signInSuccess) {
             displaySignout();
-        }else{
+        } else {
             displaySignin();
         }
     }
-    public GoogleSignInResult getSignInResultFromIntent (Intent data){
-        return null;
-    }
-    public PendingResult<Status> signOut(GoogleApiClient out){
-        out.disconnect();
-        return null;
-}
-    public PendingResult<Status> revokeAccess (GoogleApiClient client){
-        return null;
-    }
-    public OptionalPendingResult<GoogleSignInResult> silentSignIn (GoogleApiClient client){
-        return null;
-    }
-
-    public Intent getSignInIntent (GoogleApiClient client){
-        return null;
-    }
-
     public void displaySignin(){
         View button1 = getActivity().findViewById(R.id.account_sign_in_agora);
-        View button2 = getActivity().findViewById(R.id.account_sign_in_google);
+        View button2 = getActivity().findViewById(R.id.account_register);
         button1.animate().scaleY(1).scaleX(1).start();
         button2.animate().scaleY(1).scaleX(1).start();
     }
     public void removeSignin(){
         View button1 = getActivity().findViewById(R.id.account_sign_in_agora);
-        View button2 = getActivity().findViewById(R.id.account_sign_in_google);
+        View button2 = getActivity().findViewById(R.id.account_register);
         button1.animate().scaleY(0).scaleX(0).start();
         button2.animate().scaleY(0).scaleX(0).start();
     }
     public void displaySignout(){
         try {
             View sign_out = getActivity().findViewById(R.id.account_sign_out_button);
-            //sign_out.setScaleX(0);
-            //sign_out.setScaleY(0);
+            if(sign_out.getVisibility()==View.VISIBLE)return;
+            sign_out.setScaleX(1);
+            sign_out.setScaleY(1);
             sign_out.setVisibility(View.VISIBLE);
-            sign_out.animate().scaleY(1).scaleX(1).start();
+            //sign_out.animate().scaleY(1).scaleX(1).start();
         }catch (Exception e){
-            try {
-                View sign_out = getView().findViewById(R.id.account_sign_out_button);
-                //sign_out.setScaleX(0);
-                //sign_out.setScaleY(0);
-                sign_out.setVisibility(View.VISIBLE);
-                sign_out.animate().scaleY(1).scaleX(1).start();
-            }catch (Exception k){
-                k.toString();
-            }
+            key.toString();
         }
     }
     public void removeSignout(){
@@ -351,18 +253,7 @@ public class Account_tab extends Fragment
     public void setProfileName(String newName){
         name = newName;
     }
-    public void setEmpty(){
-        setProfileName("Doe");
-        setMyQuestions(0);
-        setMyResponses(0);
-        setMyVotes(0);
-        setQuestionVotes(0);
-        setResponseVotes(0);
-        setTotalResponses(0);
-        user_id = null;
-        user = null;
-        key = null;
-    }
+
 
     public void refreshMyQuestions(ViewGroup container){
         try{
