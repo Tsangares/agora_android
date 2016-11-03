@@ -63,7 +63,7 @@ public class main extends AppCompatActivity{
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         sort_tab = Sort_tab.newInstance("null", "null");
-        account_tab = Account_tab.newInstance(null);
+        account_tab = Account_tab.newInstance();
         agora_tab = Agora_tab.newInstance(null);
 
 
@@ -187,59 +187,6 @@ public class main extends AppCompatActivity{
             return rootView;
         }
 
-    }
-    public void     setMyQuestions(String input){
-        account_tab.setMyQuestions(input);
-    }
-    public void     addMyQuestions(Integer input){
-        account_tab.addMyQuestions(input);
-    }
-    public Integer  getMyQuestions(){
-        return account_tab.getMyQuestions();
-    }
-    public void     setMyResponses(String input){
-        account_tab.setMyResponses(input);
-    }
-    public void     addMyResponses(Integer input){
-        account_tab.addMyResponses(input);
-    }
-    public Integer  getMyResponses(){ return account_tab.getMyResponses(); }
-    public void     setMyVotes(String input){ account_tab.setMyVotes(input); }
-    public void     addMyVotes(Integer input){
-        account_tab.addMyVotes(input);
-    }
-    public Integer  getMyVotes(){
-        return account_tab.getMyVotes();
-    }
-    public void     setQuestionVotes(String input){
-        account_tab.setQuestionVotes(input);
-    }
-    public void     addQuestionVotes(Integer input){
-        account_tab.addQuestionVotes(input);
-    }
-    public Integer  getQuestionVotes(){
-        return account_tab.getQuestionVotes();
-    }
-    public void     setResponseVotes(String input){
-        account_tab.setResponseVotes(input);
-    }
-    public void     addResponseVotes(Integer input){
-        account_tab.addResponseVotes(input);
-    }
-    public Integer  getResponseVotes(){
-        return account_tab.getResponseVotes();
-    }
-    public void     setTotalResponses(String input){
-        account_tab.setTotalResponses(input);
-    }
-    public void     addTotalResponses(Integer input){
-        account_tab.addTotalResponses(input);
-    }
-    public Integer  getTotalResponses(){
-        return account_tab.getTotalResponses();
-    }
-    public void     setProfileName(String newName){
-        account_tab.setProfileName(newName);
     }
 
     /**

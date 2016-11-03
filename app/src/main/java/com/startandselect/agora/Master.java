@@ -92,14 +92,14 @@ public class Master extends AppCompatActivity
                 return;
             }
             String account_data = data.getStringExtra("account");
+            Profile.initialize(this, account_data);
             FragmentManager fg = getSupportFragmentManager();
             Fragment current = fg.findFragmentById(R.id.main_content);
             Account_tab account_tab = null;
             if(current instanceof Account_tab) {
-                account_tab = (Account_tab) current;
-                account_tab.setAccount(new DataUser(account_data));
+                //account_tab.refreshAccount();
             }else{
-                account_tab = Account_tab.newInstance(account_data);
+                account_tab = Account_tab.newInstance();
                 FragmentTransaction transaction = fg.beginTransaction();
                 transaction.replace(R.id.main_content, account_tab);
                 transaction.addToBackStack(Master.FRAG_AGORA);
@@ -130,7 +130,7 @@ public class Master extends AppCompatActivity
             frag = Sort_tab.newInstance("","");
             transaction.replace(R.id.main_content, frag, FRAG_TAGS);
         } else if (id == R.id.nav_account) {
-            frag = Account_tab.newInstance(null);
+            frag = Account_tab.newInstance();
             transaction.replace(R.id.main_content, frag, FRAG_ACCT);
         } else if (id == R.id.nav_add) {
             frag = NewQuestion.newInstance();

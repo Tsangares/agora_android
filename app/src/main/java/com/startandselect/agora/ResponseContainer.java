@@ -111,7 +111,7 @@ class NewResponse extends LinearLayout {
     public void processData(final String data){
         try {
             removeAllViews();
-            //Need o update server side to pass a JSON Object not a JSON array.
+            //Need o initialize server side to pass a JSON Object not a JSON array.
             JSONObject arr = (new JSONArray(data)).getJSONObject(0);
             this.addView(new Response(getContext(), parent, arr, true));
             ((OnAccountListener)getContext()).addMyResponses(1);

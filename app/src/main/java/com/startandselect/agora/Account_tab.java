@@ -8,9 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 public class Account_tab extends Fragment{
     public static int RC_LOGIN_AGORA = 6116;
     public static int RC_REGISTER_AGORA = 6226;
@@ -18,28 +15,12 @@ public class Account_tab extends Fragment{
 
     private static final String ARG_UESR_DATA = "user_data";
 
-    public DataUser user = null;
-
-    public String name = "Doe";
-    public Integer user_id = null;
-    public String key = "";
-
-    private Integer myQuestions = 0;
-    private Integer myResponses = 0;
-    private Integer myVotes = 0;
-    private Integer QuestionVotes = 0;
-    private Integer ResponseVotes = 0;
-    private Integer TotalResponses = 0;
-
     public Account_tab() {
     }
 
-    public static Account_tab newInstance(String user_data) {
+    public static Account_tab newInstance() {
         Account_tab fragment = new Account_tab();
         Bundle args = new Bundle();
-        if(user_data == null){
-            args.putString(ARG_UESR_DATA, user_data);
-        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,7 +30,7 @@ public class Account_tab extends Fragment{
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             if(getArguments().getString(ARG_UESR_DATA) != null) {
-                setAccount(new DataUser(getArguments().getString(ARG_UESR_DATA)));
+                refreshAccount();
             }
         }
     }
@@ -85,55 +66,27 @@ public class Account_tab extends Fragment{
         getView().findViewById(R.id.account_sign_in_agora).setOnClickListener(openLogin);
 
         //Data setup
-        refreshAccount(); //Initializes all of the fields?
-        if(user != null){
-            //Sign in user from the data.
-            setAccount(user);
-        }
+        refreshAccount();
     }
-    public void saveAccount(){
+    public void refreshAccount(){
+        refreshAccount((ViewGroup)getView());
+    }
+    public void refreshAccount(ViewGroup container){
 
+        refreshProfileName(container);
+        refreshMyQuestions(container);
+        refreshMyResponses(container);
+        refreshMyVotes(container);
+        refreshResponseVotes(container);
+        refreshQuestionVotes(container);
+        refreshTotalResponses(container);
     }
-    public void setAccount(DataUser data){
-        removeSignin();
-        displaySignout();
-        saveAccount();
-        user = data;
-        setProfileName(data.username);
-        setMyQuestions(data.total_questions);
-        setMyResponses(data.total_responses);
-        setMyVotes(data.total_votes);
-        setQuestionVotes(-1);
-        setResponseVotes(-1);
-        setTotalResponses(-1);
-        refreshAccount();
-        displaySignout();
-    }
-    public void setEmpty(){
-        setProfileName("Doe");
-        setMyQuestions(0);
-        setMyResponses(0);
-        setMyVotes(0);
-        setQuestionVotes(0);
-        setResponseVotes(0);
-        setTotalResponses(0);
-        user_id = null;
-        user = null;
-        key = null;
-        refreshAccount();
-    }
+
     public void agoraSignin(String data){
         displaySignout();
-        try{
-            setAccount(new DataUser(data));
-        }catch(Exception e){
-            throw new RuntimeException(e.toString());
-        }
     }
 
     public void agoraSignOut(){
-        name = "Doe";
-        setEmpty();
         removeSignout();
     }
     public void updateUI(boolean signInSuccess) {
@@ -164,7 +117,7 @@ public class Account_tab extends Fragment{
             sign_out.setVisibility(View.VISIBLE);
             //sign_out.animate().scaleY(1).scaleX(1).start();
         }catch (Exception e){
-            key.toString();
+            e.toString();
         }
     }
     public void removeSignout(){
@@ -178,87 +131,11 @@ public class Account_tab extends Fragment{
             }
         }).start();
     }
-    public void setMyQuestions(String input){
-        setMyQuestions(Integer.parseInt(input));
-    }
-    public void setMyQuestions(Integer input){
-        myQuestions = input;
-    }
-    public void addMyQuestions(Integer input){
-        myQuestions+=input;
-    }
-    public Integer getMyQuestions(){
-        return myQuestions;
-    }
-    public void setMyResponses(String input){
-        setMyResponses(Integer.parseInt(input));
-    }
-    public void setMyResponses(Integer input){
-        myResponses = input;
-    }
-    public void addMyResponses(Integer input){
-        myResponses += input;
-    }
-    public Integer getMyResponses(){
-        return myResponses;
-    }
-    public void setMyVotes(String input){
-        setMyVotes(Integer.parseInt(input));
-    }
-    public void setMyVotes(Integer input){
-        myVotes = input;
-    }
-    public void addMyVotes(Integer input){
-        myVotes += input;
-    }
-    public Integer getMyVotes(){
-        return myVotes;
-    }
-    public void setQuestionVotes(String input){
-        setQuestionVotes(Integer.parseInt(input));
-    }
-    public void setQuestionVotes(Integer input){
-        QuestionVotes = input;
-    }
-    public void addQuestionVotes(Integer input){
-        QuestionVotes += input;
-    }
-    public Integer getQuestionVotes(){
-        return QuestionVotes;
-    }
-    public void setResponseVotes(String input){
-        setResponseVotes(Integer.parseInt(input));
-    }
-    public void setResponseVotes(Integer input){
-        ResponseVotes = input;
-    }
-    public void addResponseVotes(Integer input){
-        ResponseVotes += input;
-    }
-    public Integer getResponseVotes(){
-        return ResponseVotes;
-    }
-    public void setTotalResponses(String input){
-        setTotalResponses(Integer.parseInt(input));
-    }
-    public void setTotalResponses(Integer input){
-        TotalResponses = input;
-    }
-    public void addTotalResponses(Integer input){
-        TotalResponses += input;
-    }
-    public Integer getTotalResponses(){
-        return TotalResponses;
-    }
-    public void setProfileName(String newName){
-        name = newName;
-    }
-
 
     public void refreshMyQuestions(ViewGroup container){
         try{
             TextView stats_myQuestions = (TextView)container.findViewById(R.id.account_stats_myQuestions);
-            stats_myQuestions.setText(myQuestions.toString());
+            stats_myQuestions.setText(Profile.getMyQuestions().toString());
         }catch (Exception e){
             e.toString();
         }
@@ -266,7 +143,7 @@ public class Account_tab extends Fragment{
     public void refreshMyResponses(ViewGroup container){
         try {
             TextView stats_myResponses = (TextView) container.findViewById(R.id.account_stats_myResponses);
-            stats_myResponses.setText(myResponses.toString());
+            stats_myResponses.setText(Profile.getMyResponses().toString());
         }catch (Exception e){
             e.toString();
         }
@@ -274,7 +151,7 @@ public class Account_tab extends Fragment{
     public void refreshMyVotes(ViewGroup container){
         try {
             TextView stats_myVotes = (TextView)container.findViewById(R.id.account_stats_myVotes);
-            stats_myVotes.setText(myVotes.toString());
+            stats_myVotes.setText(Profile.getMyVotes().toString());
         }catch (Exception e){
             e.toString();
         }
@@ -283,7 +160,7 @@ public class Account_tab extends Fragment{
     public void refreshQuestionVotes(ViewGroup container){
         try {
             TextView stats_QuestionVotes = (TextView) container.findViewById(R.id.account_stats_QuestionVotes);
-            stats_QuestionVotes.setText(QuestionVotes.toString());
+            stats_QuestionVotes.setText(Profile.getQuestionVotes().toString());
         }catch (Exception e){
             e.toString();
         }
@@ -292,7 +169,7 @@ public class Account_tab extends Fragment{
     public void refreshResponseVotes(ViewGroup container){
         try{
             TextView stats_ResponseVotes = (TextView)container.findViewById(R.id.account_stats_ResponseVotes);
-            stats_ResponseVotes.setText(ResponseVotes.toString());
+            stats_ResponseVotes.setText(Profile.getResponseVotes().toString());
         }catch (Exception e){
             e.toString();
         }
@@ -300,7 +177,7 @@ public class Account_tab extends Fragment{
     public void refreshTotalResponses(ViewGroup container){
         try{
             TextView stats_totalResponses = (TextView)container.findViewById(R.id.account_stats_totalResponses);
-            stats_totalResponses.setText(TotalResponses.toString());
+            stats_totalResponses.setText(Profile.getTotalResponses().toString());
         }catch(Exception e){
             e.toString();
         }
@@ -309,21 +186,9 @@ public class Account_tab extends Fragment{
     public void refreshProfileName(ViewGroup container){
         try{
             TextView profileName = (TextView)container.findViewById(R.id.account_profile_name);
-            profileName.setText(name);
+            profileName.setText(Profile.getUsername());
         }catch(Exception e){
             e.toString();
         }
-    }
-    public void refreshAccount(){
-        refreshAccount((ViewGroup)getView());
-    }
-    public void refreshAccount(ViewGroup container){
-        refreshProfileName(container);
-        refreshMyQuestions(container);
-        refreshMyResponses(container);
-        refreshMyVotes(container);
-        refreshResponseVotes(container);
-        refreshQuestionVotes(container);
-        refreshTotalResponses(container);
     }
 }

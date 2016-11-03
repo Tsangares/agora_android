@@ -66,8 +66,7 @@ public class DataMeta implements Parcelable{
 }
 
 class DataResource implements Parcelable{
-    public DataMeta meta;
-    public String objects_string;
+    public DataMeta meta = null;
     public JSONArray objects;
     private int handle = ApiRequest.REPLACE;
     private boolean add = false;
@@ -122,7 +121,6 @@ class DataResource implements Parcelable{
                 meta = null;
             }
             objects = data.getJSONArray("objects");
-            objects_string = data.getString("objects");
         }catch (Exception e){
             throw new RuntimeException(e.toString());
         }
@@ -135,11 +133,9 @@ class DataResource implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(meta, 0);
-        dest.writeString(objects_string);
     }
     public DataResource(Parcel in){
         meta = in.readParcelable(DataMeta.class.getClassLoader());
-        objects_string = in.readString();
     }
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public DataResource createFromParcel(Parcel in) {
@@ -156,6 +152,9 @@ class DataUser implements Parcelable {
     public Integer total_questions = 0;
     public Integer total_responses = 0;
     public Integer total_votes = 0;
+    public Integer my_questions = 0;
+    public Integer my_responses = 0;
+    public Integer my_votes = 0;
     public DataUser(){}
     public DataUser(String data){
         try {
@@ -170,9 +169,9 @@ class DataUser implements Parcelable {
     public void update(JSONObject data){
         try{
             username = data.getString("username");
-            total_questions = data.getInt("total_questions");
-            total_responses = data.getInt("total_responses");
-            total_votes = data.getInt("total_votes");
+            my_questions = data.getInt("total_questions");
+            my_responses = data.getInt("total_responses");
+            my_votes = data.getInt("total_votes");
             try{
                 key = data.getString("key");
             }catch (Exception e){
@@ -210,10 +209,10 @@ class DataUser implements Parcelable {
     };
 }
 class DataQuestion implements Parcelable{
-    public DataUser creator;
+    public DataUser creator = null;
     public ArrayList<DataResponse> responses = new ArrayList<>();
     public String text;
-    public int id;
+    public int id = -1;
 
     public DataQuestion(){}
     public DataQuestion(JSONObject data){
@@ -265,10 +264,10 @@ class DataQuestion implements Parcelable{
     };
 }
 class DataResponse implements Parcelable {
-    public DataUser creator;
-    public ArrayList<DataModule> modules= null;
+    public DataUser creator = null;
+    public ArrayList<DataModule> modules= new ArrayList<>();
     public String text;
-    public int id;
+    public int id = -1;
 
     public DataResponse(){}
     public DataResponse(JSONObject data){
@@ -459,4 +458,17 @@ class DataComment implements Parcelable {
             return new DataResource[size];
         }
     };
+}
+class DataBuilder{
+    private DataBuilder(){
+
+    }
+    public static DataQuestion buildQuestion(String question){
+        DataQuestion temp = new DataQuestion();
+        temp.text = question;
+        return temp;
+    }
+    public static DataResource buildResource(){
+        return null;
+    }
 }

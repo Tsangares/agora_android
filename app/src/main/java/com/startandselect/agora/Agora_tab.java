@@ -1,5 +1,6 @@
 package com.startandselect.agora;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -168,6 +170,9 @@ public class Agora_tab extends Fragment  {
         setQuestionList(new DataResource(data), root);
     }
     public void setQuestionList(DataResource data){
+        if(data == null){
+            Toast.makeText(getContext(), "problem with data", Toast.LENGTH_SHORT);
+        }
         if(data.getAdd()) {
             addQuestionList(resourceToConsumable(data));
         }else{
@@ -184,29 +189,35 @@ public class Agora_tab extends Fragment  {
         setQuestionList(objects, root, false);
     }
     public void setQuestionList(final ArrayList<DataQuestion> objects, final View root, final boolean add){
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(root==null)return;
-                ListView agoraList = (ListView) root.findViewById(R.id.agora_list_view);
-                if(objects != null && agoraList != null) {
-                    mQuestionAdapter = new QuestionAdapter(getContext(), R.id.question_view, objects);
-                    if(add){
-                        mQuestions.addAll(objects);
-                        QuestionAdapter q = (QuestionAdapter)((HeaderViewListAdapter)agoraList.getAdapter()).getWrappedAdapter();
-                        q.notifyDataSetChanged();
-                    } else {
-                        mQuestions = objects;
-                        agoraList.setAdapter(mQuestionAdapter);
-                    }
-                    if(objects.size()!=0) {
-                        endView.setLoading();
-                    }else{
-                        endView.setEnd();
+        try {
+
+            ((Activity)getContext()).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (root == null) return;
+                    ListView agoraList = (ListView) root.findViewById(R.id.agora_list_view);
+                    if (objects != null && agoraList != null) {
+                        mQuestionAdapter = new QuestionAdapter(getContext(), R.id.question_view, objects);
+                        if (add) {
+                            mQuestions.addAll(objects);
+                            QuestionAdapter q = (QuestionAdapter) ((HeaderViewListAdapter) agoraList.getAdapter()).getWrappedAdapter();
+                            q.notifyDataSetChanged();
+                        } else {
+                            mQuestions = objects;
+                            agoraList.setAdapter(mQuestionAdapter);
+                        }
+                        if (objects.size() != 0) {
+                            endView.setLoading();
+                        } else {
+                            endView.setEnd();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }catch(Exception e){
+            Toast.makeText(getContext(), "Problem updating list", Toast.LENGTH_SHORT).show();
+            e.toString();
+        }
     }
     public void addQuestionList(final ArrayList<DataQuestion> objects ){
         setQuestionList(objects, getView(), true);
@@ -266,7 +277,9 @@ public class Agora_tab extends Fragment  {
                 return new DataResource(data, request.getHandle());
             }
             catch (UnknownHostException e){
-                setQuestionList(new DataResource("{objects: [{text: 'Unknown Host???',id: 1, responses: []}]}"));
+                ArrayList<DataQuestion> output = new ArrayList<>();
+                output.add(DataBuilder.buildQuestion("Unknown Host???"));
+                setQuestionList(output);
             }
             catch (ConnectException e){
                 setQuestionList(new DataResource("{objects: [{text: 'Connection Error',id: 1 responses: []}]}"));
