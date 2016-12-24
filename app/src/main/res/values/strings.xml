@@ -30,8 +30,9 @@
     <string name="newresponse_submit">submit</string>
     <string name="newquestion_error_noquestion">The question field needs to have something in it.</string>
     <string name="newquestion_error_notags">The tags field needs to have something it it.</string>
+    <string name="newquestion_error_noconnection">The Bind Watchmaker is nowhere to be found. You must have not be connected to the internet.</string>
     <string name="newquestion_success">I just asked the server, The Blind Watchmaker, your question. If The Blind Watchmaker likes it, then it will be uploaded.</string>
-
+    <string name="newquestion_error_not_logged_in">Sorry, you must be logged in to post a question.</string>
     <string name="default_response_data">[\'text\': \'There are no responses.\']</string>
     <string name="account_title">Account</string>
     <string name="account_anonymous_name">John Doe</string>

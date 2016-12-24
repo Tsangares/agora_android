@@ -65,6 +65,8 @@ public class Account_tab extends Fragment{
         getView().findViewById(R.id.account_profile_card).setOnClickListener(openLogin);
         getView().findViewById(R.id.account_sign_in_agora).setOnClickListener(openLogin);
 
+        if(!Profile.getLoggedIn())getActivity().findViewById(R.id.account_loggedin_container).setVisibility(View.GONE);
+        else getActivity().findViewById(R.id.account_loggedin_container).setVisibility(View.VISIBLE);
         //Data setup
         refreshAccount();
     }
@@ -72,7 +74,7 @@ public class Account_tab extends Fragment{
         refreshAccount((ViewGroup)getView());
     }
     public void refreshAccount(ViewGroup container){
-
+        if(Profile.getLoggedIn()) getActivity().findViewById(R.id.account_loggedin_container).setVisibility(View.VISIBLE);
         refreshProfileName(container);
         refreshMyQuestions(container);
         refreshMyResponses(container);

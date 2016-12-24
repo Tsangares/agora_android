@@ -35,6 +35,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -93,7 +94,7 @@ public class Agora_tab extends Fragment  {
         if (getArguments() != null) {
             mData = getArguments().getString(ARG_DATA);
             if(mData == null){
-                mData = default_data;
+                displayError("Looking for all the questions in the chaotic space of the internet...");
                 fetchQuestionList();
             }
         }
@@ -146,18 +147,37 @@ public class Agora_tab extends Fragment  {
             }
         });
         agoraList.addFooterView(endView);
-        setQuestionList(mData);
-
+        if(mData == null){
+            setQuestionList(new ArrayList<DataQuestion>());
+        }else{
+            setQuestionList(mData);
+        }
     }
     public void setQuestionListNext(){
-        if(mData.equals(default_data))return;
+        if(mData == null)return;
         ListView agoraList = (ListView) getView().findViewById(R.id.agora_list_view);
         if(mData_resource != null && mData_resource.meta != null && !mData_resource.meta.next.equals("null")){
             ApiRequest request = new ApiRequest(mData_resource.meta.next, ApiRequest.BASE, ApiRequest.APPEND);
             new DownloadQuestions().execute(request);
         }else{
-            endView.setEnd();
+            endView.setEnd(null);
         }
+    }
+    public void displayError(final String error){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ListView agoraList = (ListView) getView().findViewById(R.id.agora_list_view);
+                    mQuestionAdapter = new QuestionAdapter(getContext(), R.id.question_view, new ArrayList<DataQuestion>());
+                    agoraList.setAdapter(mQuestionAdapter);
+                    endView.setEnd(error);
+                }catch (Exception e){
+                    e.toString();
+                }
+            }
+        });
+
     }
     public void fetchQuestionList(){
         ApiRequest request = new ApiRequest("question/", ApiRequest.FULL);
@@ -172,6 +192,7 @@ public class Agora_tab extends Fragment  {
     public void setQuestionList(DataResource data){
         if(data == null){
             Toast.makeText(getContext(), "problem with data", Toast.LENGTH_SHORT);
+            return;
         }
         if(data.getAdd()) {
             addQuestionList(resourceToConsumable(data));
@@ -209,7 +230,7 @@ public class Agora_tab extends Fragment  {
                         if (objects.size() != 0) {
                             endView.setLoading();
                         } else {
-                            endView.setEnd();
+                            endView.setEnd(null);
                         }
                     }
                 }
@@ -277,9 +298,8 @@ public class Agora_tab extends Fragment  {
                 return new DataResource(data, request.getHandle());
             }
             catch (UnknownHostException e){
-                ArrayList<DataQuestion> output = new ArrayList<>();
-                output.add(DataBuilder.buildQuestion("Unknown Host???"));
-                setQuestionList(output);
+                displayError("Could not connect...");
+                Toast.makeText(getContext(), "Internet not found...", Toast.LENGTH_LONG);
             }
             catch (ConnectException e){
                 setQuestionList(new DataResource("{objects: [{text: 'Connection Error',id: 1 responses: []}]}"));
@@ -292,9 +312,14 @@ public class Agora_tab extends Fragment  {
             }
             return null;
         }
+        //This is of object type because then it can handle both a DataResource returned from the function or an ArrayList<DataQuestion>
+        //ArrayList<DataQuestion> is returned by DataBuilder as an attempt to make creating DataQuestions easier.
+        //DataResource is returned on a successful data transfer.
         protected void onPostExecute(DataResource data) {
-            setQuestionList(data);
-        }
+            if(data != null) {
+                setQuestionList(data);
 
+            }
+        }
     }
 }

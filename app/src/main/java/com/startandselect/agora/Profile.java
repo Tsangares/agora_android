@@ -7,7 +7,9 @@ import android.widget.Toast;
  * Created by Examiner on 10/24/16.
  */
 public final class Profile {
+    private static Boolean loggedin = false;
     private static String username = "Doe";
+    private static String apikey = null;
     private static Integer id = -2;
     private static Integer theme = 0;
     private static Integer myQuestions = 0;
@@ -28,15 +30,19 @@ public final class Profile {
         }
     }
     public static void initialize(DataUser data){
+        if(data.key!=null)loggedin = true;
         setProfileName(data.username);
         setMyQuestions(data.my_questions);
         setMyResponses(data.my_responses);
         setMyVotes(data.my_votes);
+        setApiKey(data.key);
         setQuestionVotes(-1);
         setResponseVotes(-1);
         setTotalResponses(-1);
     }
     public static void clear(){
+        loggedin = false;
+        setApiKey(null);
         setId(-1);
         setTheme(0);
         setProfileName("Doe");
@@ -47,6 +53,9 @@ public final class Profile {
         setResponseVotes(0);
         setTotalResponses(0);
     }
+    public static Boolean getLoggedIn(){return loggedin;}
+    public static void setApiKey(String key){apikey = key;}
+    public static String getApiKey(){return apikey;}
     public static void setTheme(Integer input){id = input;}
     public static Integer getTheme(){return id;}
     public static void setId(Integer input){id = input;}

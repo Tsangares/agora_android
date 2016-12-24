@@ -67,7 +67,7 @@ public class DataMeta implements Parcelable{
 
 class DataResource implements Parcelable{
     public DataMeta meta = null;
-    public JSONArray objects;
+    public JSONArray objects = null;
     private int handle = ApiRequest.REPLACE;
     private boolean add = false;
     public DataResource(){}
@@ -175,7 +175,7 @@ class DataUser implements Parcelable {
             try{
                 key = data.getString("key");
             }catch (Exception e){
-                //No Key
+                key = null;
             }
         }catch (Exception e){
             throw new RuntimeException(e.toString());
@@ -211,7 +211,7 @@ class DataUser implements Parcelable {
 class DataQuestion implements Parcelable{
     public DataUser creator = null;
     public ArrayList<DataResponse> responses = new ArrayList<>();
-    public String text;
+    public String text = "Default Question";
     public int id = -1;
 
     public DataQuestion(){}
@@ -266,7 +266,7 @@ class DataQuestion implements Parcelable{
 class DataResponse implements Parcelable {
     public DataUser creator = null;
     public ArrayList<DataModule> modules= new ArrayList<>();
-    public String text;
+    public String text = "Default Response";
     public int id = -1;
 
     public DataResponse(){}
@@ -332,11 +332,11 @@ class DataResponse implements Parcelable {
 }
 
 class DataModule implements Parcelable {
-    public DataUser creator;
+    public DataUser creator = null;
     public ArrayList<DataComment> comments = null;
-    public String text;
-    public String title;
-    public int id;
+    public String text = "Default Module Text";
+    public String title = "Default Module Title";
+    public int id = -1;
     public DataModule(){}
     public DataModule(JSONObject data){
         update(data);
@@ -402,9 +402,9 @@ class DataModule implements Parcelable {
     };
 }
 class DataComment implements Parcelable {
-    public DataUser creator;
-    public String text;
-    public int id;
+    public DataUser creator = null;
+    public String text = "Default Comment";
+    public int id = -1;
     public DataComment(){}
     public DataComment(JSONObject data){
         update(data);

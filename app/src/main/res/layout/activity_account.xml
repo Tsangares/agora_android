@@ -114,7 +114,8 @@
                 android:id="@+id/login_google"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/padding_default">
+                android:layout_margin="@dimen/padding_default"
+                android:visibility="gone">
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
@@ -139,7 +140,8 @@
                 android:id="@+id/login_facebook"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/padding_default">
+                android:layout_margin="@dimen/padding_default"
+                android:visibility="gone">
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"

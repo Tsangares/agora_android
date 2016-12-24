@@ -57,7 +57,7 @@ class EndOfList extends LinearLayout {
                 setLoading();
                 break;
             case END:
-                setEnd();
+                setEnd(null);
                 break;
         }
     }
@@ -77,7 +77,9 @@ class EndOfList extends LinearLayout {
         removeAllViews();
         addView(loading);
     }
-    public void setEnd(){
+    public void setEnd(String input){
+        if(input == null) input = "No More Questions";
+        list_end.setText(input);
         removeAllViews();
         addView(list_end);
     }

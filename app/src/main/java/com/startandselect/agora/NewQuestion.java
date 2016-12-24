@@ -1,26 +1,21 @@
 package com.startandselect.agora;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -71,6 +66,14 @@ public class NewQuestion extends Fragment {
                 }
             }
         });
+        if(!Profile.getLoggedIn()){
+            inputQuestion.setEnabled(false);
+            inputTags.setEnabled(false);
+            prompt.setText(R.string.newquestion_error_not_logged_in);
+        }else{
+            inputQuestion.setEnabled(true);
+            inputTags.setEnabled(true);
+        }
         return output;
     }
 
@@ -93,6 +96,17 @@ public class NewQuestion extends Fragment {
                     Toast.makeText(activity, "Asking Server", Toast.LENGTH_SHORT).show();
                     URL url = new URL("http://api.iex.ist/full/question");
                     HttpURLConnection connect = (HttpURLConnection)url.openConnection();
+                    if(!Profile.getLoggedIn()){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                EditText prompt = (EditText) getView().findViewById(R.id.newquestion_questioninput);
+                                prompt.setError(getString(R.string.newquestion_error_not_logged_in));
+                            }
+                        });
+                        return null;
+                    }
+                    connect.setRequestProperty("Authorization", "ApiKey "+ Profile.getUsername()+":"+Profile.getApiKey());
                     connect.setRequestMethod("POST");
                     //post attributes
                     RestParam parameters = new RestParam();
@@ -110,8 +124,22 @@ public class NewQuestion extends Fragment {
 
                     InputStream is = new BufferedInputStream(connect.getInputStream());
                     processNewQuestion(Common.convertinputStreamToString(is));
-                }catch (Exception e){
-                    e.toString();
+                }catch(FileNotFoundException k) {
+                    (getActivity()).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView prompt = (TextView) getView().findViewById(R.id.newquestion_prompt);
+                            prompt.setText(R.string.newquestion_error_noconnection);
+                        }
+                    });
+                }catch (final Exception e){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView prompt = (TextView) getView().findViewById(R.id.newquestion_prompt);
+                            prompt.setText(e.toString());
+                        }
+                    });
                 }
                 return null;
             }
