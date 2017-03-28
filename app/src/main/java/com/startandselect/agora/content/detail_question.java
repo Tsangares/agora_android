@@ -1,11 +1,10 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -15,10 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ArrayAdapter;
+
+import com.startandselect.agora.R;
+import com.startandselect.agora.net.ApiRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,13 +31,15 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+
+import com.startandselect.agora.net.DataResponse;
+import com.startandselect.agora.net.api.Fetch;
+import com.startandselect.agora.net.api.GetList;
 
 /**
  * Things I added on plane:
@@ -195,41 +199,9 @@ public class Detail_Question extends Fragment {
         //Setup mModules so the index matches up with the response index.
     }
 
-    public class DownloadModules extends AsyncTask<ApiRequest, Integer, String> {
-        protected String doInBackground(ApiRequest... requests){
-            try{
-                ApiRequest request = requests[0];
-                if(Looper.myLooper() == null)Looper.prepare();
-                URL url = new URL(request.URL);
-                HttpURLConnection connect = (HttpURLConnection)url.openConnection();
-                connect.setRequestMethod("GET");
-                if(false) {
-                    OutputStream os = connect.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(request.params.toString());
-                    writer.flush();
-                    writer.close();
-                    os.close();
-                }
-                connect.connect();
-                InputStream is = new BufferedInputStream(connect.getInputStream());
-                String data = Common.convertinputStreamToString(is);
-                //mData = data;
-                return data;
-            }
-            catch (UnknownHostException e){
-                //setQuestionList("{objects: [{text: 'Unknown Host???', responses: []}]}");
-            }
-            catch (ConnectException e){
-                ///setQuestionList("{objects: [{text: 'Connection Error', responses: []}]}");
-            }
-            catch (FileNotFoundException e){
-                //setQuestionList("{objects: [{text: 'The IT guy is turning the computer on and off. SERVER PROBLEM', responses: []}]}");
-            }
-            catch (Exception e){
-                throw new RuntimeException(e.toString());
-            }
-            return null;
+    public class DownloadModules extends GetList {
+        public AsyncTask download(Integer offset,Integer limit, Integer order){
+            return init(Fetch.TYPE_MODULE, offset, limit, order);
         }
         protected void onPostExecute(String data) {
             setAllModuleLists(data);

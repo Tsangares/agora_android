@@ -1,4 +1,4 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -12,6 +12,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.startandselect.agora.R;
+import com.startandselect.agora.account.Profile;
+import com.startandselect.agora.net.api.Fetch;
+import com.startandselect.agora.net.RestParam;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -123,7 +128,7 @@ public class NewQuestion extends Fragment {
                     connect.connect();
 
                     InputStream is = new BufferedInputStream(connect.getInputStream());
-                    processNewQuestion(Common.convertinputStreamToString(is));
+                    processNewQuestion(Fetch.convertInputStreamToString(is));
                 }catch(FileNotFoundException k) {
                     (getActivity()).runOnUiThread(new Runnable() {
                         @Override

@@ -1,4 +1,4 @@
-package com.startandselect.agora;
+package com.startandselect.agora.account;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.startandselect.agora.R;
 
 public class Account_tab extends Fragment{
     public static int RC_LOGIN_AGORA = 6116;

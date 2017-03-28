@@ -17,6 +17,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.startandselect.agora.account.Account_tab;
+import com.startandselect.agora.account.Profile;
+import com.startandselect.agora.content.Agora_tab;
+import com.startandselect.agora.content.NewQuestion;
+import com.startandselect.agora.content.Sort_tab;
 
 public class Master extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

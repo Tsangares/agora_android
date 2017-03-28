@@ -1,4 +1,4 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +39,7 @@ public class TagButton extends Button{
             setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((OnAgoraListener) getContext()).setFilterTags(tag);
+                    //((OnAgoraListener) getContext()).setFilterTags(tag);
                 }
             });
         } catch (Exception e) {

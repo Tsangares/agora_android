@@ -1,4 +1,4 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,21 +8,23 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.startandselect.agora.Master;
+import com.startandselect.agora.R;
+import com.startandselect.agora.account.Account_tab;
+import com.startandselect.agora.net.ApiRequest;
+import com.startandselect.agora.net.DataQuestion;
+import com.startandselect.agora.net.DataResource;
+
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -35,7 +37,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Objects;
+
+import com.startandselect.agora.EndOfList;
+import com.startandselect.agora.net.api.Fetch;
+import com.startandselect.agora.net.api.GetList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,31 +52,12 @@ import java.util.Objects;
  */
 public class Agora_tab extends Fragment  {
 
-    private static final String ARG_DATA = "question_data";
+    private static final String ARG_DATA = "question_data"; //WTF is this???
 
     public QuestionAdapter mQuestionAdapter;
     public String mData;
     public DataResource mData_resource = null;
     public static ArrayList<DataQuestion> mQuestions;
-    private Account_tab account;
-    private OnAgoraListener mListener;
-
-    //get rid of this:
-    public static Fragment mainFragment = null;
-
-    public static final String URL_POPULAR = "https://startandselect.com/api/ego/question/";
-    public static final String URL_RECENT = "https://startandselect.com/api/ego/question/";
-    public static final String URL_SEARCH = "https://startandselect.com/scripts/Search.php";
-    public static final int FILTER_MODE_POPULAR = 0;
-    public static final int FILTER_MODE_RECENT = 1;
-    public static final int FILTER_MODE_SEARCH = 2;
-    public static final int FILTER_MODE_TAGS = 3;
-    public static final int FILTER_MODE_NONE = 4;
-    private String current_url = URL_POPULAR;
-    private int filter_mode = 0;
-    private String default_data = "{objects: []}";
-    private String searchQuery = null;
-    private String tags = null;
     //For the listview: to avoid multiple calls for last item
     private int preLast = -1;
 
@@ -95,7 +81,7 @@ public class Agora_tab extends Fragment  {
             mData = getArguments().getString(ARG_DATA);
             if(mData == null){
                 displayError("Looking for all the questions in the chaotic space of the internet...");
-                fetchQuestionList();
+                new DownloadQuestions().download(0,20,null);
             }
         }
     }
@@ -179,10 +165,6 @@ public class Agora_tab extends Fragment  {
         });
 
     }
-    public void fetchQuestionList(){
-        ApiRequest request = new ApiRequest("question/", ApiRequest.FULL);
-        new DownloadQuestions().execute(request);
-    }
     public void setQuestionList(String data){
         setQuestionList(new DataResource(data));
     }
@@ -251,7 +233,6 @@ public class Agora_tab extends Fragment  {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
     public ArrayList<DataQuestion> stringToConsumable(String input){
         return resourceToConsumable(new DataResource(input));
@@ -275,42 +256,9 @@ public class Agora_tab extends Fragment  {
         }
         return output;
     }
-    public class DownloadQuestions extends AsyncTask<ApiRequest, Integer, DataResource>{
-        protected DataResource doInBackground(ApiRequest... requests){
-            try{
-                ApiRequest request = requests[0];
-                if(Looper.myLooper() == null)Looper.prepare();
-                URL url = new URL(request.URL);
-                HttpURLConnection connect = (HttpURLConnection)url.openConnection();
-                connect.setRequestMethod("GET");
-                if(false) {
-                    OutputStream os = connect.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(request.params.toString());
-                    writer.flush();
-                    writer.close();
-                    os.close();
-                }
-                connect.connect();
-                InputStream is = new BufferedInputStream(connect.getInputStream());
-                String data = Common.convertinputStreamToString(is);
-                mData = data;
-                return new DataResource(data, request.getHandle());
-            }
-            catch (UnknownHostException e){
-                displayError("Could not connect...");
-                Toast.makeText(getContext(), "Internet not found...", Toast.LENGTH_LONG);
-            }
-            catch (ConnectException e){
-                setQuestionList(new DataResource("{objects: [{text: 'Connection Error',id: 1 responses: []}]}"));
-            }
-            catch (FileNotFoundException e){
-                setQuestionList(new DataResource("{objects: [{text: 'The IT guy is turning the computer on and off. SERVER PROBLEM',id: 1, responses: []}]}"));
-            }
-            catch (Exception e){
-                throw new RuntimeException(e.toString());
-            }
-            return null;
+    public class DownloadQuestions extends GetList{
+        public AsyncTask download(Integer offset,Integer limit, Integer order){
+            return init(GetList.TYPE_QUESTION, offset, limit, order);
         }
         //This is of object type because then it can handle both a DataResource returned from the function or an ArrayList<DataQuestion>
         //ArrayList<DataQuestion> is returned by DataBuilder as an attempt to make creating DataQuestions easier.
@@ -318,7 +266,6 @@ public class Agora_tab extends Fragment  {
         protected void onPostExecute(DataResource data) {
             if(data != null) {
                 setQuestionList(data);
-
             }
         }
     }

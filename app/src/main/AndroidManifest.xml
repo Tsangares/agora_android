@@ -15,12 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Login"
+            android:name=".account.Login"
             android:label="@string/activity_login_bar_title"
             android:parentActivityName=".Master">
         </activity>
         <activity
-            android:name=".Register"
+            android:name=".account.Register"
             android:label="@string/activity_register_bar_title"
             android:parentActivityName=".Master">
         </activity>

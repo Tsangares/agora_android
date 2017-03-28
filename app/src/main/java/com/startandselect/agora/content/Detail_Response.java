@@ -1,16 +1,16 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
+
+import com.startandselect.agora.R;
+import com.startandselect.agora.net.DataModule;
 
 import java.util.ArrayList;
 

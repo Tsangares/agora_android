@@ -1,17 +1,18 @@
-package com.startandselect.agora;
+package com.startandselect.agora.account;
 
 import android.content.Context;
 import android.widget.Toast;
+
+import com.startandselect.agora.net.DataUser;
 
 /**
  * Created by Examiner on 10/24/16.
  */
 public final class Profile {
-    private static Boolean loggedin = false;
+    private static Boolean loggedin = false; //I want to delete this.
     private static String username = "Doe";
     private static String apikey = null;
     private static Integer id = -2;
-    private static Integer theme = 0;
     private static Integer myQuestions = 0;
     private static Integer myResponses = 0;
     private static Integer myVotes = 0;

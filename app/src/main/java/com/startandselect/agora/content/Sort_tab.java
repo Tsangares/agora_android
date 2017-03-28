@@ -1,29 +1,21 @@
-package com.startandselect.agora;
+package com.startandselect.agora.content;
 
-import android.app.Activity;
 import android.app.Service;
-import android.content.Context;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.BaseAdapter;
-import android.widget.GridLayout;
 import android.widget.Toast;
 
 import com.bowyer.app.fabtoolbar.FabToolbar;
+import com.startandselect.agora.R;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -47,7 +39,6 @@ public class Sort_tab extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private OnAccountListener account;
     public Sort_tab() {
         // Required empty public constructor
     }
@@ -95,42 +86,7 @@ public class Sort_tab extends Fragment {
     public void onDetach() {
         super.onDetach();
     }
-    public void processPopularTagData(final String data){
-        //Process the data from the server.
-        try {
-            final ViewGroup thisContainer = (ViewGroup) getActivity().findViewById(R.id.tab_sort_main);
-            if(thisContainer != null){
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        thisContainer.setPadding(10,10,10,10);
-                        try {
-                            JSONArray arr = new JSONArray(data);
-                            for(int i = 0; i < arr.length(); ++i){
-                                QuestionCard tag = new QuestionCard(getContext(), null);
-                                final String tagText = arr.getJSONObject(i).getString("tag");
-                                tag.QuestionTitle.setText(tagText);
-                                tag.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        ((OnAgoraListener) getContext()).setFilterTags(tagText);
-                                    }
-                                });
-                                thisContainer.addView(tag);
-                            }
-                        }catch(Exception e){
-                            throw new RuntimeException(e.toString());
-                        }
-                    }
-                });
-            }else{
-                    throw new RuntimeException("Problem with getting a container.");
-            }
-        }catch(Exception e){
-            //Container not ready
-            throw new RuntimeException(e.toString());
-        }
-    }
+
     public void fetchPopularTagData(){
         //Get the data from the server.
         AsyncTask<Void, Void, Void> net = new AsyncTask<Void, Void, Void>() {
@@ -157,7 +113,7 @@ public class Sort_tab extends Fragment {
                     connect.connect();
 
                     InputStream is = new BufferedInputStream(connect.getInputStream());
-                    processPopularTagData(Common.convertinputStreamToString(is));
+                    //processPopularTagData(Common.convertInputStreamToString(is));
                     Toast.makeText(getContext(), "sent data to frag", Toast.LENGTH_SHORT).show();
                 }catch (Exception e){
                     e.toString();

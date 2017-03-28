@@ -1,23 +1,25 @@
-package com.startandselect.agora;
+package com.startandselect.agora.account;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Looper;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.app.LoaderManager.LoaderCallbacks;
+
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -28,13 +30,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.json.JSONObject;
+import com.startandselect.agora.R;
+import com.startandselect.agora.net.ApiRequest;
+import com.startandselect.agora.net.api.Account;
+import com.startandselect.agora.net.api.Fetch;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 /**
  * A login screen that offers login via email/password.
  */
-public class Register extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -73,7 +75,7 @@ public class Register extends AppCompatActivity implements LoaderCallbacks<Curso
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.register_account);
+        setContentView(R.layout.activity_account);
         // Set up the login form.
         mUserView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
@@ -90,7 +92,7 @@ public class Register extends AppCompatActivity implements LoaderCallbacks<Curso
             }
         });
 
-        View mSignInButton = findViewById(R.id.register_agora);
+        View mSignInButton = findViewById(R.id.login_agora);
         mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,7 +121,7 @@ public class Register extends AppCompatActivity implements LoaderCallbacks<Curso
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
             Snackbar.make(mUserView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new OnClickListener() {
+                    .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
                         public void onClick(View v) {
@@ -193,11 +195,7 @@ public class Register extends AppCompatActivity implements LoaderCallbacks<Curso
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            ApiRequest request = new ApiRequest("register/", ApiRequest.FULL);
-            request.setMethod(ApiRequest.POST);
-            request.add("username", username);
-            request.add("password", password);
-            new UserLoginTask(request).execute();
+            (new UserLoginTask()).login(username, password);
         }
     }
     private boolean isUservalid(String username) {
@@ -294,80 +292,27 @@ public class Register extends AppCompatActivity implements LoaderCallbacks<Curso
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(Register.this,
+                new ArrayAdapter<>(Login.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mUserView.setAdapter(adapter);
     }
 
-    public class UserLoginTask extends AsyncTask<Void, Void, String> {
-
-        private final ApiRequest mRequest;
-
-        UserLoginTask(ApiRequest request) {
-            mRequest=request;
-        }
-
-        @Override
-        protected String doInBackground(Void... requests) {
-            if(Looper.myLooper() == null)Looper.prepare();
-            try {
-                ApiRequest request = mRequest;
-                HttpURLConnection connect = (HttpURLConnection) (new URL(request.URL)).openConnection();
-                connect.setDoOutput(true);
-                connect.setRequestProperty("Content-Type","application/json");
-                connect.setRequestMethod(request.getMethod());
-                OutputStream os = connect.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                writer.write(request.params.toJSON());
-                writer.flush();
-                writer.close();
-                os.close();
-                connect.connect();
-                final int status = connect.getResponseCode();
-                if(status == 201) {
-                    final InputStream is = new BufferedInputStream(connect.getInputStream());
-                    final String data = Common.convertinputStreamToString(is);
-                    return data;
-                    /*try {
-                        //JSONObject obj = new JSONObject(data);
-                    } catch (Exception e) {
-
-                    }*/
-                }else{
-                    //String reason = obj.getString("reason");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mPasswordView.setError(getString(R.string.error_wrong_password));
-                        }
-                    });
-                }
-            }catch(Exception e){
-                e.toString();
-                Intent output = new Intent();
-                setResult(RESULT_CANCELED, output);
-                finish();
-                return null;
-            }
-            return null;
-        }
+    public class UserLoginTask extends Account {
         @Override
         protected void onPostExecute(final String data) {
             mAuthTask = null;
             showProgress(false);
-
             if (data != null) {
                 Intent output = new Intent();
                 output.putExtra("account", data);
                 setResult(RESULT_OK, output);
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_registration_failed));
+                mPasswordView.setError(getString(R.string.login_incorrect));
                 mPasswordView.requestFocus();
             }
         }
-
         @Override
         protected void onCancelled() {
             mAuthTask = null;

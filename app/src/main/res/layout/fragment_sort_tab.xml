@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.startandselect.agora.Sort_tab">
+    tools:context="com.startandselect.agora.content.Sort_tab">
     <ScrollView
         android:id="@+id/tab_sort_scroll"
         android:layout_width="match_parent"
