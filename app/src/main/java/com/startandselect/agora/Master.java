@@ -6,6 +6,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,9 +20,12 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.startandselect.agora.account.Account_tab;
 import com.startandselect.agora.account.Profile;
+import com.startandselect.agora.content.AgoraList;
 import com.startandselect.agora.content.Agora_tab;
 import com.startandselect.agora.content.NewQuestion;
+import com.startandselect.agora.content.QuestionList;
 import com.startandselect.agora.content.Sort_tab;
+import com.startandselect.agora.net.api.GetList;
 
 public class Master extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -51,7 +55,7 @@ public class Master extends AppCompatActivity
         if(savedInstanceState != null){
             frag = getSupportFragmentManager().getFragment(savedInstanceState, FRAG_AGORA);
         }else{
-            frag = Agora_tab.newInstance(null);
+            frag = QuestionList.newInstance(this);
         }
         FragmentTransaction transaction = fg.beginTransaction();
         transaction.add(R.id.main_content, frag, FRAG_AGORA);
@@ -129,7 +133,7 @@ public class Master extends AppCompatActivity
         Fragment frag = null;
         FragmentTransaction transaction = fg.beginTransaction();
         if (id == R.id.nav_home) {
-            frag = Agora_tab.newInstance(null);
+            frag = QuestionList.newInstance(this);
             transaction.replace(R.id.main_content, frag, FRAG_AGORA);
         } else if (id == R.id.nav_tags) {
             frag = Sort_tab.newInstance("","");

@@ -3,6 +3,7 @@ package com.startandselect.agora.net.api;
 import android.os.AsyncTask;
 
 import com.startandselect.agora.net.ApiRequest;
+import com.startandselect.agora.net.DataResource;
 
 /**
  * Created by astro on 2/21/17.

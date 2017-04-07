@@ -8,25 +8,30 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 import com.startandselect.agora.net.RestRequest;
+import com.startandselect.agora.net.api.GetList;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 @RunWith(AndroidJUnit4.class)
 public class NetTest {
-    /*
-    public class Asynk_Example extends setDetail {
+    public class Asynk_Example extends GetList {
         protected void onPostExecute(String data){
             if(data != null){
-
+                success();
             }else{
                 //failed
+                fail("nope");
             }
         }
     }
-    public String result(String input){
-        return input;
-    }*/
+    public void success(){
+        //To
+    }
+    @Test
+    public void test(){
+        //Asynk_Example a = new Asynk_Example().init(GetList.TYPE_QUESTION);
+    }
 
     @Test
     public void is_returning_data() {

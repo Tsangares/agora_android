@@ -48,6 +48,9 @@ public abstract class Fetch extends AsyncTask<ApiRequest, Integer, String> {
                         ists, "UTF-8"));
                 while ((line = r1.readLine()) != null) {
                     sb.append(line).append("\n");
+                    //if(!r1.ready()){
+                     //   break;
+                    //}
                 }
             } finally {
                 ists.close();
@@ -76,20 +79,20 @@ public abstract class Fetch extends AsyncTask<ApiRequest, Integer, String> {
             String data = convertInputStreamToString(is);
             return data;
         }
-        catch (UnknownHostException e){
-            return e.toString();
+        /*catch (UnknownHostException e){
+            throw new UnknownHostException( e.toString());
             //No host
         }
         catch (ConnectException e){
-            return e.toString();
+            throw new RuntimeException( e.toString());
             //No connection
         }
         catch (FileNotFoundException e){
-            return e.toString();
+            throw new RuntimeException( e.toString());
             //Server is down
-        }
+        }*/
         catch (Exception e){
-            return e.toString();
+            throw new RuntimeException( e.toString());
             //Something else happened
         }
     }

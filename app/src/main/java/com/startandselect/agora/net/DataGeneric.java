@@ -12,14 +12,13 @@ import java.util.Arrays;
 /**
  * Created by astro on 2/17/17.
  */
-public class DataQuestion extends DataGeneric implements Parcelable {
+public class DataGeneric implements Parcelable {
     public DataUser creator = null;
-    public ArrayList<DataResponse> responses = new ArrayList<>();
-    public String text = "Default Question";
+    //public ArrayList<DataGeneric> children = new ArrayList<>();
+    public String text = "Default";
     public int id = -1;
-
-    public DataQuestion(){}
-    public DataQuestion(JSONObject data){
+    public DataGeneric(){}
+    public DataGeneric(JSONObject data){
         update(data);
     }
     public void update(JSONObject data){
@@ -31,20 +30,15 @@ public class DataQuestion extends DataGeneric implements Parcelable {
             }catch (Exception e){
                 creator = null;
             }
-            try{
-                responses = DataResponse.getArray(data.getString("responses"));
-            }catch (Exception e){
-                responses = new ArrayList<>();
-            }
         }catch (Exception e){
             throw new RuntimeException(e.toString());
         }
     }
-    public static ArrayList<DataQuestion> getQuestionArray(JSONArray objects){
-        ArrayList<DataQuestion> output = new ArrayList<>();
+    public static ArrayList<DataGeneric> getArray(JSONArray objects){
+        ArrayList<DataGeneric> output = new ArrayList<>();
         try{
             for(int i = 0; i < objects.length(); ++i){
-                output.add(new DataQuestion(objects.getJSONObject(i)));
+                output.add(new DataGeneric(objects.getJSONObject(i)));
             }
         }catch (Exception e){
             e.toString();
@@ -59,13 +53,11 @@ public class DataQuestion extends DataGeneric implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(creator, 0);
-        dest.writeParcelableArray(responses.toArray(new DataResponse[responses.size()]),0);
         dest.writeString(text);
         dest.writeInt(id);
     }
-    public DataQuestion(Parcel in){
+    public DataGeneric(Parcel in){
         creator = in.readParcelable(DataUser.class.getClassLoader());
-        responses = new ArrayList<>(Arrays.asList((DataResponse[])in.readParcelableArray(DataResponse.class.getClassLoader())));
         text = in.readString();
         id = in.readInt();
     }
